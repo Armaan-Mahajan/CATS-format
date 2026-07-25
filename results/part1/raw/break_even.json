@@ -1,0 +1,957 @@
+{
+  "calibrated_vs_full_grammar_ratio": {
+    "anthropic": {
+      "n_50": {
+        "full_grammar_primer_tokens": 743,
+        "mean_calibrated_primer_tokens": 302.77,
+        "ratio_calibrated_to_full": 0.4075
+      }
+    },
+    "qwen": {
+      "n_50": {
+        "full_grammar_primer_tokens": 710,
+        "mean_calibrated_primer_tokens": 285.81,
+        "ratio_calibrated_to_full": 0.4025
+      }
+    },
+    "tiktoken": {
+      "n_50": {
+        "full_grammar_primer_tokens": 676,
+        "mean_calibrated_primer_tokens": 276.17,
+        "ratio_calibrated_to_full": 0.4085
+      }
+    }
+  },
+  "method_note": "Synthetic projection with replacement from converted pool. Calibrated primer per sample via build_manifest + _assemble_primer (Part 1 conversion flags). Fallen-back tools excluded.",
+  "n_trials": 1000,
+  "per_tool_median_savings_pct": {
+    "anthropic": 31.75,
+    "qwen": 26.93,
+    "tiktoken": 31.25
+  },
+  "percent_savings_thresholds": {
+    "anthropic": {
+      "10": {
+        "n": 8.637,
+        "reached": true
+      },
+      "15": {
+        "n": 11.718,
+        "reached": true
+      },
+      "20": {
+        "n": 18.656,
+        "reached": true
+      },
+      "25": {
+        "n": 41.68,
+        "reached": true
+      }
+    },
+    "qwen": {
+      "10": {
+        "n": 13.636,
+        "reached": true
+      },
+      "15": {
+        "n": 21.045,
+        "reached": true
+      },
+      "20": {
+        "n": 45.977,
+        "reached": true
+      },
+      "25": {
+        "asymptotic_median_pct_per_tool": 26.93,
+        "n": null,
+        "note": "not reached by N=50 (asymptotes toward ~26.9% per-tool median)",
+        "reached": false
+      }
+    },
+    "tiktoken": {
+      "10": {
+        "n": 9.686,
+        "reached": true
+      },
+      "15": {
+        "n": 13.334,
+        "reached": true
+      },
+      "20": {
+        "n": 21.288,
+        "reached": true
+      },
+      "25": {
+        "asymptotic_median_pct_per_tool": 31.25,
+        "n": null,
+        "note": "not reached by N=50 (asymptotes toward ~31.2% per-tool median)",
+        "reached": false
+      }
+    }
+  },
+  "pool_converted": 3100,
+  "pool_excluded_non_converted": 5,
+  "primer_builder": "from_json_with_report(assume_closed=True, map_python_types=True) \u2192 build_manifest(Document) \u2192 _assemble_primer (same flags as Part 1); full-grammar worst-case uses generate_primer_from_json(..., full_grammar=True) (Part 1 flags by default)",
+  "rng_seed": 42,
+  "tokenizers": {
+    "anthropic": {
+      "calibrated": {
+        "break_even_n": 5.491,
+        "by_n": {
+          "1": {
+            "mean_cats": 348.38,
+            "mean_json": 168.93,
+            "mean_primer_tokens": 228.94,
+            "mean_savings_pct": -106.23,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "10": {
+            "mean_cats": 1488.81,
+            "mean_json": 1704.77,
+            "mean_primer_tokens": 283.04,
+            "mean_savings_pct": 12.67,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "12": {
+            "mean_cats": 1734.48,
+            "mean_json": 2049.78,
+            "mean_primer_tokens": 285.38,
+            "mean_savings_pct": 15.38,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "15": {
+            "mean_cats": 2106.55,
+            "mean_json": 2571.59,
+            "mean_primer_tokens": 287.52,
+            "mean_savings_pct": 18.08,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "2": {
+            "mean_cats": 491.12,
+            "mean_json": 341.12,
+            "mean_primer_tokens": 249.94,
+            "mean_savings_pct": -43.97,
+            "n_trials": 1000,
+            "win_rate": 0.003
+          },
+          "20": {
+            "mean_cats": 2688.92,
+            "mean_json": 3391.0,
+            "mean_primer_tokens": 292.24,
+            "mean_savings_pct": 20.7,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "25": {
+            "mean_cats": 3339.21,
+            "mean_json": 4299.88,
+            "mean_primer_tokens": 293.94,
+            "mean_savings_pct": 22.34,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "3": {
+            "mean_cats": 622.99,
+            "mean_json": 512.16,
+            "mean_primer_tokens": 260.18,
+            "mean_savings_pct": -21.64,
+            "n_trials": 1000,
+            "win_rate": 0.019
+          },
+          "30": {
+            "mean_cats": 3901.83,
+            "mean_json": 5097.44,
+            "mean_primer_tokens": 297.5,
+            "mean_savings_pct": 23.46,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "4": {
+            "mean_cats": 752.02,
+            "mean_json": 685.48,
+            "mean_primer_tokens": 267.25,
+            "mean_savings_pct": -9.71,
+            "n_trials": 1000,
+            "win_rate": 0.07
+          },
+          "40": {
+            "mean_cats": 5117.29,
+            "mean_json": 6810.59,
+            "mean_primer_tokens": 300.22,
+            "mean_savings_pct": 24.86,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "5": {
+            "mean_cats": 880.48,
+            "mean_json": 859.8,
+            "mean_primer_tokens": 270.69,
+            "mean_savings_pct": -2.41,
+            "n_trials": 1000,
+            "win_rate": 0.235
+          },
+          "50": {
+            "mean_cats": 6344.67,
+            "mean_json": 8536.92,
+            "mean_primer_tokens": 302.77,
+            "mean_savings_pct": 25.68,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "6": {
+            "mean_cats": 994.76,
+            "mean_json": 1016.24,
+            "mean_primer_tokens": 275.79,
+            "mean_savings_pct": 2.11,
+            "n_trials": 1000,
+            "win_rate": 0.642
+          },
+          "7": {
+            "mean_cats": 1118.92,
+            "mean_json": 1189.58,
+            "mean_primer_tokens": 277.78,
+            "mean_savings_pct": 5.94,
+            "n_trials": 1000,
+            "win_rate": 0.924
+          },
+          "8": {
+            "mean_cats": 1238.67,
+            "mean_json": 1357.51,
+            "mean_primer_tokens": 279.15,
+            "mean_savings_pct": 8.75,
+            "n_trials": 1000,
+            "win_rate": 0.987
+          }
+        }
+      },
+      "calibrated_vs_full_grammar_ratio": {
+        "n_50": {
+          "full_grammar_primer_tokens": 743,
+          "mean_calibrated_primer_tokens": 302.77,
+          "ratio_calibrated_to_full": 0.4075
+        }
+      },
+      "full_grammar_worst_case": {
+        "break_even_n": 14.895,
+        "by_n": {
+          "1": {
+            "mean_cats": 862.32,
+            "mean_json": 168.73,
+            "mean_savings_pct": -411.06,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "10": {
+            "mean_cats": 1939.68,
+            "mean_json": 1694.48,
+            "mean_savings_pct": -14.47,
+            "n_trials": 1000,
+            "win_rate": 0.004
+          },
+          "12": {
+            "mean_cats": 2192.69,
+            "mean_json": 2048.52,
+            "mean_savings_pct": -7.04,
+            "n_trials": 1000,
+            "win_rate": 0.048
+          },
+          "15": {
+            "mean_cats": 2555.51,
+            "mean_json": 2560.72,
+            "mean_savings_pct": 0.2,
+            "n_trials": 1000,
+            "win_rate": 0.459
+          },
+          "2": {
+            "mean_cats": 980.34,
+            "mean_json": 336.85,
+            "mean_savings_pct": -191.03,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "20": {
+            "mean_cats": 3149.78,
+            "mean_json": 3400.94,
+            "mean_savings_pct": 7.39,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "25": {
+            "mean_cats": 3746.96,
+            "mean_json": 4250.0,
+            "mean_savings_pct": 11.84,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "3": {
+            "mean_cats": 1107.78,
+            "mean_json": 514.76,
+            "mean_savings_pct": -115.2,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "30": {
+            "mean_cats": 4341.01,
+            "mean_json": 5091.73,
+            "mean_savings_pct": 14.74,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "4": {
+            "mean_cats": 1224.88,
+            "mean_json": 681.97,
+            "mean_savings_pct": -79.61,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "40": {
+            "mean_cats": 5570.66,
+            "mean_json": 6822.72,
+            "mean_savings_pct": 18.35,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "5": {
+            "mean_cats": 1334.12,
+            "mean_json": 837.93,
+            "mean_savings_pct": -59.22,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "50": {
+            "mean_cats": 6763.96,
+            "mean_json": 8511.85,
+            "mean_savings_pct": 20.53,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "6": {
+            "mean_cats": 1474.13,
+            "mean_json": 1031.2,
+            "mean_savings_pct": -42.95,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "7": {
+            "mean_cats": 1595.41,
+            "mean_json": 1204.39,
+            "mean_savings_pct": -32.47,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "8": {
+            "mean_cats": 1696.33,
+            "mean_json": 1350.09,
+            "mean_savings_pct": -25.65,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          }
+        },
+        "primer_tokens": 743
+      },
+      "label": "anthropic \u2014 Claude Sonnet 4.6 / Opus 4.6",
+      "percent_savings_thresholds": {
+        "10": {
+          "n": 8.637,
+          "reached": true
+        },
+        "15": {
+          "n": 11.718,
+          "reached": true
+        },
+        "20": {
+          "n": 18.656,
+          "reached": true
+        },
+        "25": {
+          "n": 41.68,
+          "reached": true
+        }
+      }
+    },
+    "qwen": {
+      "calibrated": {
+        "break_even_n": 7.762,
+        "by_n": {
+          "1": {
+            "mean_cats": 322.89,
+            "mean_json": 140.24,
+            "mean_primer_tokens": 216.93,
+            "mean_savings_pct": -130.23,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "10": {
+            "mean_cats": 1317.51,
+            "mean_json": 1391.7,
+            "mean_primer_tokens": 266.81,
+            "mean_savings_pct": 5.33,
+            "n_trials": 1000,
+            "win_rate": 0.965
+          },
+          "12": {
+            "mean_cats": 1520.84,
+            "mean_json": 1658.2,
+            "mean_primer_tokens": 269.7,
+            "mean_savings_pct": 8.28,
+            "n_trials": 1000,
+            "win_rate": 0.999
+          },
+          "15": {
+            "mean_cats": 1831.23,
+            "mean_json": 2067.57,
+            "mean_primer_tokens": 272.22,
+            "mean_savings_pct": 11.43,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "2": {
+            "mean_cats": 441.89,
+            "mean_json": 274.27,
+            "mean_primer_tokens": 235.34,
+            "mean_savings_pct": -61.12,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "20": {
+            "mean_cats": 2362.69,
+            "mean_json": 2767.26,
+            "mean_primer_tokens": 274.23,
+            "mean_savings_pct": 14.62,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "25": {
+            "mean_cats": 2906.66,
+            "mean_json": 3478.41,
+            "mean_primer_tokens": 277.42,
+            "mean_savings_pct": 16.44,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "3": {
+            "mean_cats": 560.49,
+            "mean_json": 416.2,
+            "mean_primer_tokens": 245.66,
+            "mean_savings_pct": -34.67,
+            "n_trials": 1000,
+            "win_rate": 0.003
+          },
+          "30": {
+            "mean_cats": 3414.06,
+            "mean_json": 4152.96,
+            "mean_primer_tokens": 279.87,
+            "mean_savings_pct": 17.79,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "4": {
+            "mean_cats": 672.66,
+            "mean_json": 558.63,
+            "mean_primer_tokens": 251.31,
+            "mean_savings_pct": -20.41,
+            "n_trials": 1000,
+            "win_rate": 0.009
+          },
+          "40": {
+            "mean_cats": 4488.09,
+            "mean_json": 5565.4,
+            "mean_primer_tokens": 284.39,
+            "mean_savings_pct": 19.36,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "5": {
+            "mean_cats": 768.56,
+            "mean_json": 679.94,
+            "mean_primer_tokens": 256.37,
+            "mean_savings_pct": -13.03,
+            "n_trials": 1000,
+            "win_rate": 0.02
+          },
+          "50": {
+            "mean_cats": 5495.48,
+            "mean_json": 6906.7,
+            "mean_primer_tokens": 285.81,
+            "mean_savings_pct": 20.43,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "6": {
+            "mean_cats": 903.74,
+            "mean_json": 849.95,
+            "mean_primer_tokens": 260.24,
+            "mean_savings_pct": -6.33,
+            "n_trials": 1000,
+            "win_rate": 0.085
+          },
+          "7": {
+            "mean_cats": 998.04,
+            "mean_json": 975.36,
+            "mean_primer_tokens": 261.54,
+            "mean_savings_pct": -2.33,
+            "n_trials": 1000,
+            "win_rate": 0.217
+          },
+          "8": {
+            "mean_cats": 1096.27,
+            "mean_json": 1103.34,
+            "mean_primer_tokens": 263.67,
+            "mean_savings_pct": 0.64,
+            "n_trials": 1000,
+            "win_rate": 0.506
+          }
+        }
+      },
+      "calibrated_vs_full_grammar_ratio": {
+        "n_50": {
+          "full_grammar_primer_tokens": 710,
+          "mean_calibrated_primer_tokens": 285.81,
+          "ratio_calibrated_to_full": 0.4025
+        }
+      },
+      "full_grammar_worst_case": {
+        "break_even_n": 20.961,
+        "by_n": {
+          "1": {
+            "mean_cats": 810.15,
+            "mean_json": 133.69,
+            "mean_savings_pct": -505.98,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "10": {
+            "mean_cats": 1760.88,
+            "mean_json": 1391.84,
+            "mean_savings_pct": -26.51,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "12": {
+            "mean_cats": 1969.65,
+            "mean_json": 1668.51,
+            "mean_savings_pct": -18.05,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "15": {
+            "mean_cats": 2266.87,
+            "mean_json": 2066.31,
+            "mean_savings_pct": -9.71,
+            "n_trials": 1000,
+            "win_rate": 0.008
+          },
+          "2": {
+            "mean_cats": 915.22,
+            "mean_json": 272.45,
+            "mean_savings_pct": -235.92,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "20": {
+            "mean_cats": 2793.32,
+            "mean_json": 2761.09,
+            "mean_savings_pct": -1.17,
+            "n_trials": 1000,
+            "win_rate": 0.277
+          },
+          "25": {
+            "mean_cats": 3298.04,
+            "mean_json": 3433.49,
+            "mean_savings_pct": 3.95,
+            "n_trials": 1000,
+            "win_rate": 0.987
+          },
+          "3": {
+            "mean_cats": 1019.67,
+            "mean_json": 411.39,
+            "mean_savings_pct": -147.86,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "30": {
+            "mean_cats": 3840.5,
+            "mean_json": 4148.83,
+            "mean_savings_pct": 7.43,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "4": {
+            "mean_cats": 1135.01,
+            "mean_json": 560.92,
+            "mean_savings_pct": -102.35,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "40": {
+            "mean_cats": 4878.09,
+            "mean_json": 5522.35,
+            "mean_savings_pct": 11.67,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "5": {
+            "mean_cats": 1236.74,
+            "mean_json": 696.73,
+            "mean_savings_pct": -77.51,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "50": {
+            "mean_cats": 5912.44,
+            "mean_json": 6896.08,
+            "mean_savings_pct": 14.26,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "6": {
+            "mean_cats": 1343.14,
+            "mean_json": 837.22,
+            "mean_savings_pct": -60.43,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "7": {
+            "mean_cats": 1440.17,
+            "mean_json": 966.99,
+            "mean_savings_pct": -48.93,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "8": {
+            "mean_cats": 1551.97,
+            "mean_json": 1114.99,
+            "mean_savings_pct": -39.19,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          }
+        },
+        "primer_tokens": 710
+      },
+      "label": "qwen \u2014 Qwen3.5-35B-A3B",
+      "percent_savings_thresholds": {
+        "10": {
+          "n": 13.636,
+          "reached": true
+        },
+        "15": {
+          "n": 21.045,
+          "reached": true
+        },
+        "20": {
+          "n": 45.977,
+          "reached": true
+        },
+        "25": {
+          "asymptotic_median_pct_per_tool": 26.93,
+          "n": null,
+          "note": "not reached by N=50 (asymptotes toward ~26.9% per-tool median)",
+          "reached": false
+        }
+      }
+    },
+    "tiktoken": {
+      "calibrated": {
+        "break_even_n": 6.157,
+        "by_n": {
+          "1": {
+            "mean_cats": 306.93,
+            "mean_json": 138.72,
+            "mean_primer_tokens": 208.74,
+            "mean_savings_pct": -121.25,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "10": {
+            "mean_cats": 1263.57,
+            "mean_json": 1415.33,
+            "mean_primer_tokens": 256.53,
+            "mean_savings_pct": 10.72,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "12": {
+            "mean_cats": 1468.97,
+            "mean_json": 1703.33,
+            "mean_primer_tokens": 258.76,
+            "mean_savings_pct": 13.76,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "15": {
+            "mean_cats": 1786.44,
+            "mean_json": 2140.74,
+            "mean_primer_tokens": 262.11,
+            "mean_savings_pct": 16.55,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "2": {
+            "mean_cats": 431.21,
+            "mean_json": 285.87,
+            "mean_primer_tokens": 227.98,
+            "mean_savings_pct": -50.84,
+            "n_trials": 1000,
+            "win_rate": 0.002
+          },
+          "20": {
+            "mean_cats": 2264.02,
+            "mean_json": 2813.84,
+            "mean_primer_tokens": 264.18,
+            "mean_savings_pct": 19.54,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "25": {
+            "mean_cats": 2756.95,
+            "mean_json": 3504.28,
+            "mean_primer_tokens": 266.86,
+            "mean_savings_pct": 21.33,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "3": {
+            "mean_cats": 539.14,
+            "mean_json": 425.81,
+            "mean_primer_tokens": 236.08,
+            "mean_savings_pct": -26.62,
+            "n_trials": 1000,
+            "win_rate": 0.013
+          },
+          "30": {
+            "mean_cats": 3286.07,
+            "mean_json": 4241.78,
+            "mean_primer_tokens": 268.66,
+            "mean_savings_pct": 22.53,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "4": {
+            "mean_cats": 652.48,
+            "mean_json": 574.68,
+            "mean_primer_tokens": 242.93,
+            "mean_savings_pct": -13.54,
+            "n_trials": 1000,
+            "win_rate": 0.061
+          },
+          "40": {
+            "mean_cats": 4295.62,
+            "mean_json": 5655.82,
+            "mean_primer_tokens": 272.61,
+            "mean_savings_pct": 24.05,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "5": {
+            "mean_cats": 746.43,
+            "mean_json": 703.14,
+            "mean_primer_tokens": 245.58,
+            "mean_savings_pct": -6.16,
+            "n_trials": 1000,
+            "win_rate": 0.112
+          },
+          "50": {
+            "mean_cats": 5294.25,
+            "mean_json": 7058.32,
+            "mean_primer_tokens": 276.17,
+            "mean_savings_pct": 24.99,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "6": {
+            "mean_cats": 853.64,
+            "mean_json": 847.78,
+            "mean_primer_tokens": 249.86,
+            "mean_savings_pct": -0.69,
+            "n_trials": 1000,
+            "win_rate": 0.355
+          },
+          "7": {
+            "mean_cats": 951.48,
+            "mean_json": 982.96,
+            "mean_primer_tokens": 252.32,
+            "mean_savings_pct": 3.2,
+            "n_trials": 1000,
+            "win_rate": 0.738
+          },
+          "8": {
+            "mean_cats": 1044.24,
+            "mean_json": 1112.34,
+            "mean_primer_tokens": 255.19,
+            "mean_savings_pct": 6.12,
+            "n_trials": 1000,
+            "win_rate": 0.929
+          }
+        }
+      },
+      "calibrated_vs_full_grammar_ratio": {
+        "n_50": {
+          "full_grammar_primer_tokens": 676,
+          "mean_calibrated_primer_tokens": 276.17,
+          "ratio_calibrated_to_full": 0.4085
+        }
+      },
+      "full_grammar_worst_case": {
+        "break_even_n": 16.516,
+        "by_n": {
+          "1": {
+            "mean_cats": 776.72,
+            "mean_json": 141.7,
+            "mean_savings_pct": -448.14,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "10": {
+            "mean_cats": 1687.45,
+            "mean_json": 1420.77,
+            "mean_savings_pct": -18.77,
+            "n_trials": 1000,
+            "win_rate": 0.002
+          },
+          "12": {
+            "mean_cats": 1871.75,
+            "mean_json": 1682.83,
+            "mean_savings_pct": -11.23,
+            "n_trials": 1000,
+            "win_rate": 0.016
+          },
+          "15": {
+            "mean_cats": 2188.68,
+            "mean_json": 2125.48,
+            "mean_savings_pct": -2.97,
+            "n_trials": 1000,
+            "win_rate": 0.199
+          },
+          "2": {
+            "mean_cats": 872.01,
+            "mean_json": 276.99,
+            "mean_savings_pct": -214.82,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "20": {
+            "mean_cats": 2699.19,
+            "mean_json": 2844.48,
+            "mean_savings_pct": 5.11,
+            "n_trials": 1000,
+            "win_rate": 0.976
+          },
+          "25": {
+            "mean_cats": 3186.56,
+            "mean_json": 3529.97,
+            "mean_savings_pct": 9.73,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "3": {
+            "mean_cats": 969.85,
+            "mean_json": 413.7,
+            "mean_savings_pct": -134.43,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "30": {
+            "mean_cats": 3687.39,
+            "mean_json": 4236.18,
+            "mean_savings_pct": 12.95,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "4": {
+            "mean_cats": 1085.04,
+            "mean_json": 573.76,
+            "mean_savings_pct": -89.11,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "40": {
+            "mean_cats": 4652.49,
+            "mean_json": 5597.8,
+            "mean_savings_pct": 16.89,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "5": {
+            "mean_cats": 1182.58,
+            "mean_json": 711.98,
+            "mean_savings_pct": -66.1,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "50": {
+            "mean_cats": 5692.41,
+            "mean_json": 7058.09,
+            "mean_savings_pct": 19.35,
+            "n_trials": 1000,
+            "win_rate": 1.0
+          },
+          "6": {
+            "mean_cats": 1283.55,
+            "mean_json": 852.58,
+            "mean_savings_pct": -50.55,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "7": {
+            "mean_cats": 1383.51,
+            "mean_json": 994.32,
+            "mean_savings_pct": -39.14,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          },
+          "8": {
+            "mean_cats": 1478.65,
+            "mean_json": 1129.25,
+            "mean_savings_pct": -30.94,
+            "n_trials": 1000,
+            "win_rate": 0.0
+          }
+        },
+        "primer_tokens": 676
+      },
+      "label": "tiktoken o200k_base \u2014 GPT-5.X",
+      "percent_savings_thresholds": {
+        "10": {
+          "n": 9.686,
+          "reached": true
+        },
+        "15": {
+          "n": 13.334,
+          "reached": true
+        },
+        "20": {
+          "n": 21.288,
+          "reached": true
+        },
+        "25": {
+          "asymptotic_median_pct_per_tool": 31.25,
+          "n": null,
+          "note": "not reached by N=50 (asymptotes toward ~31.2% per-tool median)",
+          "reached": false
+        }
+      }
+    }
+  },
+  "tool_counts": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    10,
+    12,
+    15,
+    20,
+    25,
+    30,
+    40,
+    50
+  ]
+}

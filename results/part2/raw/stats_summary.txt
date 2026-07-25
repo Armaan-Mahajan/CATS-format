@@ -1,0 +1,47 @@
+Part 2 inferential statistics summary
+Generated: 2026-06-18T23:16:40.726702+00:00
+Input: results/part2/raw/scored_cells.jsonl
+Pre-specified non-inferiority margin delta = 3%
+
+Exclusions: 3 skipped all-fallback (a) cells; Anthropic api_error c0006749.
+
+=== Headline: CATS (a) vs JSON (b) semantic correctness, per model ===
+
+Model: gpt (gpt-5.4-2026-03-05)
+  Paired n (both syntactically valid, non-excluded): 912
+  2x2: both_ok=755  a_ok_b_fail=19  a_fail_b_ok=25  both_fail=113
+  CATS - JSON difference: -0.0066 (95% CI [-0.0208, 0.0077]; Agresti–Min (2005) paired Wald SE on McNemar table)
+  McNemar p = 0.450982 (continuity_corrected_chi_square)
+  Non-inferiority vs delta=3%: pass (CI lower bound = -0.0208)
+
+Model: claude (claude-sonnet-4-6)
+  Paired n (both syntactically valid, non-excluded): 945
+  2x2: both_ok=766  a_ok_b_fail=27  a_fail_b_ok=45  both_fail=107
+  CATS - JSON difference: -0.0190 (95% CI [-0.0366, -0.0015]; Agresti–Min (2005) paired Wald SE on McNemar table)
+  McNemar p = 0.045127 (continuity_corrected_chi_square)
+  Non-inferiority vs delta=3%: inconclusive (CI lower bound = -0.0366)
+
+Model: qwen (qwen/qwen3.5-35b-a3b)
+  Paired n (both syntactically valid, non-excluded): 956
+  2x2: both_ok=760  a_ok_b_fail=24  a_fail_b_ok=49  both_fail=123
+  CATS - JSON difference: -0.0262 (95% CI [-0.0436, -0.0087]; Agresti–Min (2005) paired Wald SE on McNemar table)
+  McNemar p = 0.004970 (continuity_corrected_chi_square)
+  Non-inferiority vs delta=3%: inconclusive (CI lower bound = -0.0436)
+
+Three-model pattern (factual): GPT=pass, Claude=inconclusive, Qwen=inconclusive.
+
+=== Audit reconciliation (preview vs paired semantic a vs b) ===
+  gpt: match=True  preview={'cats_wrong_json_right': 25, 'cats_right_json_wrong': 19}  actual={'cats_wrong_json_right': 25, 'cats_right_json_wrong': 19, 'paired_n': 912}
+  claude: match=True  preview={'cats_wrong_json_right': 45, 'cats_right_json_wrong': 27}  actual={'cats_wrong_json_right': 45, 'cats_right_json_wrong': 27, 'paired_n': 945}
+  qwen: match=True  preview={'cats_wrong_json_right': 49, 'cats_right_json_wrong': 24}  actual={'cats_wrong_json_right': 49, 'cats_right_json_wrong': 24, 'paired_n': 956}
+
+=== Descriptive Wilson CIs (see descriptive_rates.csv) ===
+  gpt a_cats: syn 0.962 [0.949,0.973] n=984; sem 0.842 [0.817,0.863] n=947
+  gpt b_json: syn 0.937 [0.920,0.951] n=985; sem 0.854 [0.829,0.875] n=923
+  gpt c_native: syn 0.918 [0.899,0.933] n=985; sem 0.799 [0.771,0.824] n=904
+  claude a_cats: syn 0.971 [0.958,0.979] n=984; sem 0.836 [0.811,0.858] n=955
+  claude b_json: syn 0.969 [0.956,0.978] n=985; sem 0.856 [0.833,0.877] n=954
+  claude c_native: syn 0.963 [0.950,0.973] n=984; sem 0.836 [0.812,0.859] n=948
+  qwen a_cats: syn 0.974 [0.962,0.982] n=984; sem 0.820 [0.795,0.843] n=958
+  qwen b_json: syn 0.992 [0.984,0.996] n=985; sem 0.839 [0.815,0.861] n=977
+  qwen c_native: syn 0.973 [0.960,0.981] n=985; sem 0.847 [0.822,0.868] n=958

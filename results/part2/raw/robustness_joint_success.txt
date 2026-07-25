@@ -1,0 +1,37 @@
+Part 2 robustness check: joint (unconditional) success, CATS (a) vs JSON (b)
+Generated: 2026-07-02T09:11:11.560905+00:00
+Input: results/part2/raw/scored_cells.jsonl
+
+Post-hoc robustness companion to the pre-specified conditional semantic
+analysis (stats_summary.txt). Outcome per entry:
+  joint_success = syntactic_valid AND (semantic_correct is True)
+Syntactic failures count as failures instead of being excluded, removing the
+conditioning on a post-treatment outcome (potential collider). Same paired
+McNemar / Agresti-Min CI / delta=3% non-inferiority machinery as the primary.
+Same exclusions as the primary: all-fallback entry, api_error c0006749,
+skipped/non-completed cells.
+
+Model: gpt (gpt-5.4-2026-03-05)
+  Paired n (unconditional; no validity conditioning): 984
+  2x2: both_ok=755  a_ok_b_fail=42  a_fail_b_ok=32  both_fail=155
+  CATS - JSON difference: 0.0102 (95% CI [-0.0070, 0.0273]; Agresti–Min (2005) paired Wald SE on McNemar table)
+  McNemar p = 0.295455 (continuity_corrected_chi_square)
+  Non-inferiority vs delta=3%: pass (CI lower bound = -0.0070)
+  headline (conditional): pass, CI [-0.0208, 0.0077] (n=912) | joint (unconditional): pass, CI [-0.0070, 0.0273] (n=984)
+
+Model: claude (claude-sonnet-4-6)
+  Paired n (unconditional; no validity conditioning): 984
+  2x2: both_ok=766  a_ok_b_fail=32  a_fail_b_ok=51  both_fail=135
+  CATS - JSON difference: -0.0193 (95% CI [-0.0374, -0.0012]; Agresti–Min (2005) paired Wald SE on McNemar table)
+  McNemar p = 0.048182 (continuity_corrected_chi_square)
+  Non-inferiority vs delta=3%: inconclusive (CI lower bound = -0.0374)
+  headline (conditional): inconclusive, CI [-0.0366, -0.0015] (n=945) | joint (unconditional): inconclusive, CI [-0.0374, -0.0012] (n=984)
+
+Model: qwen (qwen/qwen3.5-35b-a3b)
+  Paired n (unconditional; no validity conditioning): 984
+  2x2: both_ok=760  a_ok_b_fail=26  a_fail_b_ok=60  both_fail=138
+  CATS - JSON difference: -0.0346 (95% CI [-0.0529, -0.0162]; Agresti–Min (2005) paired Wald SE on McNemar table)
+  McNemar p = 0.000373 (continuity_corrected_chi_square)
+  Non-inferiority vs delta=3%: inconclusive (CI lower bound = -0.0529)
+  headline (conditional): inconclusive, CI [-0.0436, -0.0087] (n=956) | joint (unconditional): inconclusive, CI [-0.0529, -0.0162] (n=984)
+

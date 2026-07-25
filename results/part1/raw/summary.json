@@ -1,0 +1,42 @@
+{
+  "buckets": {
+    "converted": 3100,
+    "fell_back": 5,
+    "invalid_input": 0
+  },
+  "coverage": 0.998389694041868,
+  "fallback_cause_breakdown": {
+    "enum with non-member-checkable constraint(s) ['items'] (\u00a75.6)": 4,
+    "integer with unencodable keyword(s) ['maxItems', 'minItems']": 1
+  },
+  "invalid_input_pct_of_pre_dedupe": 0.0,
+  "pre_dedupe_tool_occurrences": 8576,
+  "rename_stats": {
+    "per_alias_counts": {
+      "any": 29,
+      "dict": 9296,
+      "float": 1669,
+      "tuple": 66
+    },
+    "tools_touched_by_rename": 8576
+  },
+  "token_deltas": {
+    "anthropic": {
+      "mean_delta": -49.85387096774193,
+      "mean_pct_reduction": 31.460907061233005,
+      "median_delta": -45.0
+    },
+    "qwen": {
+      "mean_delta": -33.956774193548384,
+      "mean_pct_reduction": 27.121520344718814,
+      "median_delta": -31.0
+    },
+    "tiktoken": {
+      "mean_delta": -40.74709677419355,
+      "mean_pct_reduction": 31.269570330154114,
+      "median_delta": -36.0
+    }
+  },
+  "total_raw_occurrences_after_dedupe_weight": 8576,
+  "unique_def_count": 3105
+}

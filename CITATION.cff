@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use CATS, please cite this repository."
+title: "CATS: Compact Agent Tool Schema"
+abstract: >-
+  CATS is a compact notation for the tool (function) definitions sent to large
+  language models in tool-calling APIs. Encoding a tool definition in CATS rather
+  than JSON Schema reduces input tokens by a median of roughly 30% across the
+  OpenAI, Qwen, and Anthropic tokenizers, with a small and model-dependent effect
+  on tool-calling accuracy. This repository contains the format specification, a
+  reference converter between JSON Schema and CATS, and the full evaluation.
+type: software
+authors:
+  - family-names: Mahajan
+    given-names: Armaan
+version: 1.0.0
+date-released: "2026-07-25"
+license: MIT
+repository-code: "https://github.com/Armaan-Mahajan/CATS-format"
+url: "https://github.com/Armaan-Mahajan/CATS-format"
+keywords:
+  - tool calling
+  - function calling
+  - json schema
+  - large language models
+  - token efficiency
+  - llm agents

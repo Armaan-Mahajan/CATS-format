@@ -1,0 +1,72 @@
+{
+  "run_id": "full_eval_20260618T053204Z",
+  "metadata_tag": "cats-part2-eval",
+  "corpus": {
+    "total_entries": 985,
+    "categories": {
+      "live_simple": 258,
+      "multiple": 200,
+      "live_multiple": 527
+    },
+    "subsample_note": "live_multiple subsampled to 527 of 1053; see eval/part2/live_multiple_subsample.json and eval/part2/sample_live_multiple.py"
+  },
+  "models": {
+    "openai": "gpt-5.4-2026-03-05",
+    "anthropic": "claude-sonnet-4-6",
+    "qwen": "qwen/qwen3.5-35b-a3b (OpenRouter \u2192 Parasail fp8)"
+  },
+  "conditions": [
+    "cats_in_prompt",
+    "json_in_prompt",
+    "native_tools"
+  ],
+  "batch_jobs": "redacted",
+  "cell_counts": {
+    "logical_cells": 8865,
+    "completed": 8861,
+    "skipped": 3,
+    "api_error": 1
+  },
+  "exclusions": {
+    "skipped_all_fallback": {
+      "entry_id": "live_simple_71-35-0",
+      "count": 3,
+      "reason": "cats_all_fallback \u2014 no condition (a) cell",
+      "note": "Drop from McNemar (a)-vs-(b) paired comparisons"
+    },
+    "api_error": {
+      "custom_id": "c0006749",
+      "entry_id": "live_simple_67-31-0",
+      "model": "claude-sonnet-4-6",
+      "condition": "native_tools",
+      "reason": "Anthropic rejected tool schema (property key a\u00f1o_vehiculo); provider limitation, not model/CATS failure"
+    }
+  },
+  "statistics": {
+    "delta_non_inferiority_pp": 3.0,
+    "pre_specified_in": "fixed constant DELTA in eval/part2/compute_stats.py; rationale in the paper's Statistical Method section",
+    "headline_comparison": "cats_in_prompt vs json_in_prompt semantic correctness, per model, McNemar paired",
+    "wilson_method": "statsmodels proportion_confint(method='wilson')",
+    "paired_difference_ci_method": "Agresti\u2013Min (2005) paired Wald on McNemar table"
+  },
+  "headline_non_inferiority_verdicts": {
+    "gpt-5.4-2026-03-05": "pass",
+    "claude-sonnet-4-6": "inconclusive",
+    "qwen/qwen3.5-35b-a3b": "inconclusive"
+  },
+  "artifacts_in_this_directory": {
+    "scored_cells.jsonl": "per-cell outcomes (8,865 rows)",
+    "scored_cells.csv": "same, CSV",
+    "descriptive_rates.csv": "Wilson CIs per model \u00d7 condition",
+    "part2_stats_results.csv": "paired McNemar tests + \u03b4 verdict",
+    "part2_stats_results.json": "full stats manifest",
+    "stats_summary.txt": "plain-text headline summary"
+  },
+  "source_paths": {
+    "run_directory": "eval/part2/runs/full_eval_20260618T053204Z",
+    "stats_directory": "eval/part2/stats",
+    "immutable_raw_store": "eval/part2/runs/full_eval_20260618T053204Z/raw_store.jsonl",
+    "phase2_submission": "eval/part2/runs/full_eval_20260618T053204Z/phase2_submission.json"
+  },
+  "generated_at": "2026-06-18T23:16:40+00:00"
+}

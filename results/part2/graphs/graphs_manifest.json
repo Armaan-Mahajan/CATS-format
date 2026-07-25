@@ -1,0 +1,10 @@
+{
+  "graphs": [
+    "semantic_accuracy_by_condition.png",
+    "syntactic_validity_by_condition.png",
+    "non_inferiority_forest.png",
+    "mcnemar_a_vs_b_semantic.png",
+    "prompt_vs_native_paired.png"
+  ],
+  "source": "results/part2/raw/descriptive_rates.csv, part2_stats_results.csv"
+}

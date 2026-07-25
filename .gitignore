@@ -1,0 +1,57 @@
+# ── Intentionally omitted from this public release ──────────────────────────
+# The following existed in the private development repository and were
+# deliberately left out of this public archive. They are listed here so the
+# omission is visible and explicit.
+#
+#   .env                          API credentials
+#   notes/                        internal planning and design-decision notes
+#   eval/api-logs/                raw API request/response logs
+#   eval/part2/logs/              pilot and smoke-test logs
+#   eval/part2/runs/              raw inference store (published copies are in results/)
+#   eval/out/                     duplicate of results/part1
+#   ui/                           internal visualization server
+#   .private/                     unredacted backups of redacted published files
+#   eval/part2/cost_estimate.py   internal budget-planning script
+#   eval/part2/dry_run.py         internal dry-run script
+#   eval/part2/pilot_run.py       pilot infrastructure
+#   eval/part2/pilot_sample.py    pilot sampling script
+#   eval/part2/batch_smoke_test.py  smoke-test script
+#   eval/part2/mock_responses.py  mock-response fixtures
+#   eval/part2/runner.py          mock/live cell orchestration loop
+#   eval/part2/live_json_prompt_check.py  debugging script
+#
+# Each of the above has an enforcing rule below, so restoring one locally will
+# not silently add it to a commit.
+
+# ── Intentionally-omitted paths (enforced, not just documented) ─────────────
+notes/
+ui/
+.private/
+eval/api-logs/
+eval/out/
+eval/part2/logs/
+eval/part2/runs/
+eval/part2/cost_estimate.py
+eval/part2/dry_run.py
+eval/part2/pilot_run.py
+eval/part2/pilot_sample.py
+eval/part2/batch_smoke_test.py
+eval/part2/mock_responses.py
+eval/part2/runner.py
+eval/part2/live_json_prompt_check.py
+
+# ── Standard ignores (keep local runs from dirtying the tree) ───────────────
+__pycache__/
+*.py[cod]
+.env
+.env.*
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.hypothesis/
+.DS_Store
+
+# Hugging Face tokenizer cache. eval/part1/token_stats.py sets HF_HOME here, so
+# a first Part 1 run downloads tokenizer weights into this directory.
+eval/.hf_cache/
