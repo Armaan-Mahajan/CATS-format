@@ -40,6 +40,20 @@ import matplotlib
 
 matplotlib.use("Agg")  # headless: write file, no display needed
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.transforms import Bbox  # noqa: E402
+
+# Journal figure style (two-column A4, 170 mm text width, sans-serif body).
+matplotlib.rcParams.update({
+    "figure.figsize": (6.7, 2.8),   # 170mm text width; keep height tight
+    "font.size": 9,
+    "axes.labelsize": 9,
+    "xtick.labelsize": 8,
+    "ytick.labelsize": 8,
+    "legend.fontsize": 8,
+    "pdf.fonttype": 42,             # embed Type 1/TrueType, never Type 3
+    "savefig.bbox": "tight",
+    "savefig.pad_inches": 0.02,
+})
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 CATS_CONVERTER = REPO_ROOT / "cats-converter"
@@ -55,6 +69,11 @@ for _entry in (str(REPO_ROOT), str(CATS_CONVERTER)):
 
 TOKENIZERS = ("tiktoken", "qwen", "anthropic")
 PRETTY_LOCAL_TOKENIZERS = ("tiktoken", "qwen")
+
+# Paper figures are dual-saved (vector PDF + 300 dpi PNG) from the same figure.
+FIGURES_DIR = REPO_ROOT / "figures"
+GRAPHS_DIR = REPO_ROOT / "results" / "part1" / "graphs"
+PAPER_FIGURES = {"reduction_boxplot", "compact_vs_pretty_combined_boxplot"}
 
 BOX_LABELS = {
     "tiktoken": "tiktoken o200k_base — GPT-5.X",
@@ -182,59 +201,32 @@ def _print_tokenizer_stats(label: str, reductions: list[float], deltas: list[flo
     _print_absolute_stats(label, deltas, show_heading=False)
 
 
-def _spread_vertical(ys: list[float], min_sep: float) -> list[float]:
-    """Nudge display y-positions apart when labels would overlap."""
-    if len(ys) <= 1:
-        return list(ys)
-    out = list(ys)
-    for _ in range(len(out) * 3):
-        changed = False
-        for i in range(1, len(out)):
-            gap = out[i] - out[i - 1]
-            if gap < min_sep:
-                bump = (min_sep - gap) / 2
-                out[i - 1] -= bump
-                out[i] += bump
-                changed = True
-        if not changed:
-            break
-    return out
-
-
 def _annotate_box(ax, x: int, values: list[float], *, kind: MetricKind) -> None:
-    stats = _box_summary(values)
-    mean = statistics.mean(values)
-    p10 = _percentile(values, 10)
-    p90 = _percentile(values, 90)
+    """Label only the median; the box geometry already encodes quartiles/whiskers."""
+    median = _percentile(values, 50)
+    suffix = "%" if kind == "percent" else " tok"
+    fmt = f"{median:.1f}{suffix}" if kind == "percent" else f"{median:.0f}{suffix}"
+    ax.annotate(
+        fmt,
+        (x + LABEL_X_OFFSET, median),
+        fontsize=7,
+        va="center",
+        ha="left",
+        color="tab:blue",
+    )
 
-    entries = [
-        (stats["max"], "max", "black"),
-        (p90, "P90", "tab:green"),
-        (stats["q3"], "Q3", "black"),
-        (mean, "mean", "black"),
-        (stats["q2"], "median", "tab:blue"),
-        (stats["q1"], "Q1", "black"),
-        (p10, "P10", "tab:red"),
-        (stats["min"], "min", "black"),
-    ]
-    entries.sort(key=lambda item: item[0])
-    min_sep = 1.5 if kind == "percent" else max(2.0, (stats["max"] - stats["min"]) * 0.04)
-    display_ys = _spread_vertical([y for y, _, _ in entries], min_sep=min_sep)
 
-    x_text = x + LABEL_X_OFFSET
-    for (y, label, color), display_y in zip(entries, display_ys):
-        suffix = "%" if kind == "percent" else " tok"
-        fmt = f"{y:.1f}{suffix}" if kind == "percent" else f"{y:.0f}{suffix}"
-        ax.annotate(
-            f"{label} {fmt}",
-            (x_text, display_y),
-            fontsize=7,
-            va="center",
-            ha="left",
-            color=color,
-        )
-    ax.plot([x], [p10], marker="_", color="tab:red", markersize=12)
-    ax.plot([x], [p90], marker="_", color="tab:green", markersize=12)
+def _save_paper_figure(fig, name: str) -> None:
+    """Dual-save PDF (paper) + 300 dpi PNG (repo) from the same figure object.
+
+    An explicit full-figure bbox pins the page to exactly 6.7 in wide so the
+    PDF drops into ``\\linewidth`` without scaling.
+    """
+    full_bbox = Bbox([[0.0, 0.0], list(fig.get_size_inches())])
+    for out, kw in ((FIGURES_DIR / f"{name}.pdf", {}), (GRAPHS_DIR / f"{name}.png", {"dpi": 300})):
+        out.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out, bbox_inches=full_bbox, **kw)
+        print(f"Wrote {out}")
 
 
 def _write_boxplot(
@@ -243,10 +235,10 @@ def _write_boxplot(
     out_img: Path,
     *,
     kind: MetricKind,
-    title: str | None = None,
+    title: str | None = None,  # noqa: ARG001 — titles live in the LaTeX captions
     ylabel: str | None = None,
 ) -> None:
-    fig, ax = plt.subplots(figsize=(3.4 * len(box_data) + 2, 6.5))
+    fig, ax = plt.subplots(figsize=(6.7, 2.8))
     ax.boxplot(
         box_data,
         widths=0.45,
@@ -256,37 +248,35 @@ def _write_boxplot(
             "marker": "D",
             "markerfacecolor": "black",
             "markeredgecolor": "black",
-            "markersize": 6,
+            "markersize": 3.5,
         },
-        medianprops={"color": "tab:blue", "linewidth": 2},
-        flierprops={"marker": ".", "markersize": 4, "alpha": 0.4},
+        medianprops={"color": "tab:blue", "linewidth": 1.5},
+        flierprops={"marker": ".", "markersize": 2, "alpha": 0.4},
     )
     ax.set_xticks(range(1, len(box_labels) + 1))
-    ax.set_xticklabels(box_labels, fontsize=8)
+    ax.set_xticklabels([lbl.replace(" — ", "\n") for lbl in box_labels], fontsize=8)
     if ylabel is not None:
         ax.set_ylabel(ylabel)
     elif kind == "percent":
-        ax.set_ylabel("Per-tool token reduction (%)  --  higher = CATS smaller")
+        ax.set_ylabel("Token reduction (%)")
     else:
-        ax.set_ylabel("Per-tool absolute token savings (json - cats)  --  higher = CATS smaller")
-    if title is not None:
-        ax.set_title(title)
-    elif kind == "percent":
-        ax.set_title("CATS per-tool token reduction by tokenizer")
-    else:
-        ax.set_title("CATS per-tool absolute token savings by tokenizer")
+        ax.set_ylabel("Token savings (JSON − CATS)")
     ax.axhline(0, color="grey", linewidth=0.8, linestyle="--")
     ax.grid(axis="y", alpha=0.3)
-    ax.set_xlim(0.55, len(box_data) + 1.0)
+    ax.set_xlim(0.5, len(box_data) + 0.75)
 
     for i, values in enumerate(box_data, start=1):
         _annotate_box(ax, i, values, kind=kind)
 
-    fig.tight_layout()
-    out_img.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_img, dpi=150)
+    fig.tight_layout(pad=0.4)
+    name = out_img.stem
+    if name in PAPER_FIGURES:
+        _save_paper_figure(fig, name)
+    else:
+        out_img.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_img, dpi=150)
+        print(f"Wrote box plot: {out_img}")
     plt.close(fig)
-    print(f"Wrote box plot: {out_img}")
 
 
 def _ensure_import_paths() -> None:
@@ -486,7 +476,7 @@ def _write_compact_vs_pretty_combined_boxplot(
         out_img,
         kind="percent",
         title="CATS token reduction: compact vs pretty-printed JSON (all tokenizers pooled)",
-        ylabel="Per-tool token reduction (%)  --  higher = CATS smaller",
+        ylabel="Token reduction (%)",
     )
 
 
@@ -627,7 +617,7 @@ def _run_pretty_printed_analysis(
         out_pretty,
         kind="percent",
         title="CATS per-tool token reduction vs pretty-printed JSON",
-        ylabel="Per-tool token reduction (%) vs pretty JSON  --  higher = CATS smaller",
+        ylabel="Token reduction (%) vs pretty JSON",
     )
 
     if all(tok in compact_by_tok and tok in pretty_by_tok for tok in TOKENIZERS):

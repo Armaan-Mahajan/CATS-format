@@ -26,10 +26,42 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.transforms import Bbox  # noqa: E402
 
+# Journal figure style (two-column A4, 170 mm text width, sans-serif body).
+matplotlib.rcParams.update({
+    "figure.figsize": (6.7, 2.8),   # 170mm text width; keep height tight
+    "font.size": 9,
+    "axes.labelsize": 9,
+    "xtick.labelsize": 8,
+    "ytick.labelsize": 8,
+    "legend.fontsize": 8,
+    "pdf.fonttype": 42,             # embed Type 1/TrueType, never Type 3
+    "savefig.bbox": "tight",
+    "savefig.pad_inches": 0.02,
+})
+
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+FIGURES_DIR = REPO_ROOT / "figures"
 
 TOKENIZERS = ("tiktoken", "qwen", "anthropic")
 COLORS = {"tiktoken": "tab:blue", "qwen": "tab:orange", "anthropic": "tab:green"}
+# Grayscale-safe: series differ by marker AND line style, not just color.
+MARKERS = {"tiktoken": "o", "qwen": "s", "anthropic": "^"}
+LINESTYLES = {"tiktoken": "-", "qwen": "--", "anthropic": ":"}
+
+
+def _save_paper_figure(fig, name: str, png_dir: Path) -> None:
+    """Dual-save PDF (paper) + 300 dpi PNG (repo) from the same figure object.
+
+    An explicit full-figure bbox pins the page to exactly 6.7 in wide so the
+    PDF drops into ``\\linewidth`` without scaling.
+    """
+    full_bbox = Bbox([[0.0, 0.0], list(fig.get_size_inches())])
+    for out, kw in ((FIGURES_DIR / f"{name}.pdf", {}), (png_dir / f"{name}.png", {"dpi": 300})):
+        out.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out, bbox_inches=full_bbox, **kw)
+        print(f"Wrote {out}")
 
 
 def _points(rows, tok):
@@ -75,7 +107,7 @@ def main() -> None:
     out_img = Path(sys.argv[2]) if len(sys.argv) > 2 else path.parent / "savings_vs_size_all.png"
     rows = [json.loads(line) for line in path.open(encoding="utf-8") if line.strip()]
 
-    fig, ax = plt.subplots(figsize=(10, 6.5))
+    fig, ax = plt.subplots(figsize=(6.7, 2.8))
     any_data = False
     for tok in TOKENIZERS:
         pts = _points(rows, tok)
@@ -87,26 +119,26 @@ def main() -> None:
         ys = [p[1] for p in pts]
         r = _pearson(xs, ys)
         print(f"{tok}: n={len(pts)}  size range {min(xs)}..{max(xs)}  Pearson r={r:.3f}")
-        ax.scatter(xs, ys, s=8, alpha=0.12, edgecolors="none", color=COLORS[tok])
+        # Rasterize only the scatter layer: text/axes stay vector, file stays small.
+        ax.scatter(xs, ys, s=5, alpha=0.18, edgecolors="none", color=COLORS[tok],
+                   rasterized=True)
         bx, by = _binned_median(pts)
         if bx:
-            ax.plot(bx, by, color=COLORS[tok], linewidth=2.2, marker="o",
-                    markersize=4, label=f"{tok} (r={r:.2f}, n={len(pts)})")
+            ax.plot(bx, by, color=COLORS[tok], linewidth=1.6,
+                    linestyle=LINESTYLES[tok], marker=MARKERS[tok],
+                    markersize=3.5, label=f"{tok} (r={r:.2f}, n={len(pts)})")
 
     if not any_data:
         print("No tokenizer columns populated -- nothing to plot.")
         return
 
     ax.axhline(0, color="grey", linewidth=0.8, linestyle="--")
-    ax.set_xlabel("Original tool size -- normalized JSON tokens")
-    ax.set_ylabel("CATS token reduction (%)  --  higher = CATS smaller")
-    ax.set_title("Token savings vs. original tool size (all tokenizers)")
+    ax.set_xlabel("Original tool size — normalized JSON tokens")
+    ax.set_ylabel("Token reduction (%)")
     ax.grid(alpha=0.3)
-    ax.legend(loc="lower right", fontsize=9, title="binned-median trend")
-    fig.tight_layout()
-    out_img.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_img, dpi=150)
-    print(f"Wrote: {out_img}")
+    ax.legend(loc="lower right", fontsize=8, title="binned-median trend")
+    fig.tight_layout(pad=0.4)
+    _save_paper_figure(fig, out_img.stem, out_img.parent)
 
 
 if __name__ == "__main__":

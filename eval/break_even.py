@@ -24,8 +24,23 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.transforms import Bbox  # noqa: E402
+
+# Journal figure style (two-column A4, 170 mm text width, sans-serif body).
+matplotlib.rcParams.update({
+    "figure.figsize": (6.7, 2.8),   # 170mm text width; keep height tight
+    "font.size": 9,
+    "axes.labelsize": 9,
+    "xtick.labelsize": 8,
+    "ytick.labelsize": 8,
+    "legend.fontsize": 8,
+    "pdf.fonttype": 42,             # embed Type 1/TrueType, never Type 3
+    "savefig.bbox": "tight",
+    "savefig.pad_inches": 0.02,
+})
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+FIGURES_DIR = REPO_ROOT / "figures"
 CATS_CONVERTER = REPO_ROOT / "cats-converter"
 sys.path.insert(0, str(CATS_CONVERTER))
 sys.path.insert(0, str(REPO_ROOT))
@@ -374,137 +389,77 @@ def _run_constant_primer_trials(
     return mean_json, mean_cats, mean_savings, wins / n_trials
 
 
-def _annotate_savings_thresholds(
-    ax: plt.Axes,
-    *,
-    tok: str,
-    threshold_results: dict[str, dict],
-) -> None:
-    """Mark percent-savings crossing N on a mean-tokens panel (vertical guides)."""
-    ymin = ax.get_ylim()[0]
-    # Stack above break-even labels (12 / 28 pt) but stay inside the plot.
-    y_offsets = (42, 54, 66, 78)
-    for idx, threshold in enumerate(SAVINGS_THRESHOLDS):
-        entry = threshold_results.get(str(threshold), {})
-        if not entry.get("reached"):
-            continue
-        n_cross = entry.get("n")
-        if n_cross is None:
-            continue
-        ax.axvline(n_cross, color="tab:purple", linestyle=":", linewidth=0.9, alpha=0.55)
-        ax.annotate(
-            f"{threshold}% saved @ N≈{n_cross:.1f}",
-            (n_cross, ymin),
-            xytext=(6, y_offsets[idx % len(y_offsets)]),
-            textcoords="offset points",
-            fontsize=6,
-            color="tab:purple",
-        )
+def _save_paper_figure(fig, name: str, png_dir: Path) -> None:
+    """Dual-save PDF (paper) + 300 dpi PNG (repo) from the same figure object.
+
+    An explicit full-figure bbox pins the page to exactly 6.7 in wide so the
+    PDF drops into ``\\linewidth`` without scaling.
+    """
+    full_bbox = Bbox([[0.0, 0.0], list(fig.get_size_inches())])
+    for out, kw in ((FIGURES_DIR / f"{name}.pdf", {}), (png_dir / f"{name}.png", {"dpi": 300})):
+        out.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out, bbox_inches=full_bbox, **kw)
+        print(f"Wrote {out}")
 
 
 def _plot_tokenizer_panel(
     ax: plt.Axes,
     *,
-    tok: str,
     cal: dict,
     fg: dict | None,
-    title: str,
-    threshold_results: dict[str, dict],
+    name: str,
+    show_legend: bool,
 ) -> None:
     ns = TOOL_COUNTS
     mean_json = [cal["by_n"][str(n)]["mean_json"] for n in ns]
     mean_cats = [cal["by_n"][str(n)]["mean_cats"] for n in ns]
 
-    ax.plot(ns, mean_json, "o:", color="tab:blue", linewidth=2, label="JSON tools")
-    ax.plot(
-        ns,
-        mean_cats,
-        "s-",
-        color="tab:orange",
-        linewidth=2,
-        label="CATS + calibrated primer",
-    )
+    # Grayscale-safe: series differ by marker AND line style, not just color.
+    ax.plot(ns, mean_json, linestyle=":", marker="o", markersize=2.5,
+            linewidth=1.4, color="tab:blue", label="JSON tools")
+    ax.plot(ns, mean_cats, linestyle="-", marker="s", markersize=2.5,
+            linewidth=1.4, color="tab:orange", label="CATS + calibrated primer")
     if fg:
         mean_fg = [fg["by_n"][str(n)]["mean_cats"] for n in ns]
-        ax.plot(
-            ns,
-            mean_fg,
-            "^:",
-            color="gray",
-            linewidth=1.2,
-            alpha=0.55,
-            label="uncalibrated worst case (full grammar)",
-        )
+        ax.plot(ns, mean_fg, linestyle="--", marker="^", markersize=2.5,
+                linewidth=1.0, color="gray", alpha=0.7,
+                label="full-grammar worst case")
 
-    ax.set_ylabel("Mean prompt tokens")
-    ax.set_title(title)
     ax.grid(alpha=0.3)
-    ax.legend(loc="upper left", fontsize=7)
+    # Panel identifier (in-figure titles are reserved for the LaTeX caption).
+    ax.text(0.96, 0.04, name.replace(" — ", "\n"), transform=ax.transAxes,
+            fontsize=7, va="bottom", ha="right", color="black")
+    if show_legend:
+        ax.legend(loc="upper left", fontsize=7, handlelength=2.2,
+                  borderaxespad=0.3, framealpha=0.9)
 
+    # Labels sit mid-height along their guide lines: the lower-right corner
+    # holds the panel name and the curves stay low at these x positions.
     be = cal.get("break_even_n")
     if be is not None:
-        ax.axvline(be, color="tab:green", linestyle=":", linewidth=1.5)
+        ax.axvline(be, color="tab:green", linestyle=":", linewidth=1.2)
         ax.annotate(
-            f"calibrated break-even ≈ {be:.1f}",
-            (be, ax.get_ylim()[0]),
-            xytext=(6, 12),
+            f"break-even ≈ {be:.1f}",
+            (be, 0.60),
+            xycoords=("data", "axes fraction"),
+            xytext=(3, 0),
             textcoords="offset points",
-            fontsize=8,
+            fontsize=7,
             color="tab:green",
         )
     if fg and fg.get("break_even_n") is not None:
         be_fg = fg["break_even_n"]
         ax.axvline(be_fg, color="gray", linestyle=":", linewidth=1, alpha=0.6)
+        # Right-aligned in the clear region under the CATS curve; the value
+        # itself locates the matching gray guide line.
         ax.annotate(
-            f"full-grammar ≈ {be_fg:.1f}",
-            (be_fg, ax.get_ylim()[0]),
-            xytext=(6, 28),
-            textcoords="offset points",
+            f"full grammar ≈ {be_fg:.1f}",
+            (0.96, 0.21),
+            xycoords="axes fraction",
+            ha="right",
             fontsize=7,
             color="gray",
         )
-
-    mp = cal["by_n"][str(ns[0])].get("mean_primer_tokens")
-    if mp is not None:
-        ax.annotate(
-            f"mean calibrated primer @ N={ns[0]}: {mp:.0f} tok",
-            (0.02, 0.98),
-            transform=ax.transAxes,
-            fontsize=7,
-            va="top",
-            ha="left",
-            bbox={"boxstyle": "round,pad=0.3", "facecolor": "white", "alpha": 0.85},
-        )
-
-    _annotate_savings_thresholds(ax, tok=tok, threshold_results=threshold_results)
-
-
-def _plot_combined_tokens_panel(
-    ax: plt.Axes,
-    *,
-    calibrated: dict[str, dict],
-) -> None:
-    """Mean CATS prompt tokens vs N — all tokenizers on one axis."""
-    ns = TOOL_COUNTS
-    for tok, color in TOKENIZER_COLORS.items():
-        cal = calibrated.get(tok)
-        if cal is None:
-            continue
-        mean_cats = [cal["by_n"][str(n)]["mean_cats"] for n in ns]
-        ax.plot(
-            ns,
-            mean_cats,
-            color=color,
-            linewidth=2.2,
-            marker="s",
-            markersize=3,
-            label=f"{tok} (CATS + primer)",
-        )
-
-    ax.set_ylabel("Mean prompt tokens")
-    ax.set_title("Mean CATS prompt tokens vs. N (all tokenizers)")
-    ax.grid(alpha=0.3)
-    ax.legend(loc="upper left", fontsize=8, title="tokenizers")
 
 
 def _plot_break_even(
@@ -513,58 +468,30 @@ def _plot_break_even(
     full_grammar: dict[str, dict],
     labels: dict[str, str],
     *,
-    threshold_results: dict[str, dict],
-    asymptotic_medians: dict[str, float | None],
+    threshold_results: dict[str, dict],  # noqa: ARG001 — kept in break_even.json
+    asymptotic_medians: dict[str, float | None],  # noqa: ARG001 — cited in prose
 ) -> None:
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+    fig, axes = plt.subplots(1, 3, figsize=(6.7, 2.8), sharex=True, sharey=True)
 
-    panel_map = {
-        "tiktoken": axes[0, 0],
-        "qwen": axes[0, 1],
-        "anthropic": axes[1, 0],
-    }
-    for tok, ax in panel_map.items():
+    legend_shown = False
+    for ax, tok in zip(axes, ("tiktoken", "qwen", "anthropic")):
         if tok not in calibrated:
             ax.set_visible(False)
             continue
         _plot_tokenizer_panel(
             ax,
-            tok=tok,
             cal=calibrated[tok],
             fg=full_grammar.get(tok),
-            title=labels.get(tok, tok),
-            threshold_results=threshold_results.get(tok, {}),
+            name=labels.get(tok, tok),
+            show_legend=not legend_shown,
         )
+        legend_shown = True
+        ax.set_xlabel("Tools in prompt (N)")
+        ax.set_xticks((1, 10, 20, 30, 40, 50))
 
-    _plot_combined_tokens_panel(axes[1, 1], calibrated=calibrated)
-
-    for ax in axes.flat:
-        ax.set_xlabel("Number of tools in prompt (sampled with replacement)")
-        ax.set_xticks(TOOL_COUNTS)
-        ax.tick_params(axis="x", labelsize=6, rotation=45)
-
-    medians = [asymptotic_medians.get(tok) for tok in ("tiktoken", "qwen", "anthropic")]
-    if all(m is not None for m in medians):
-        footnote = (
-            "as N→∞, percent savings approaches the per-tool median reduction "
-            f"(~{medians[0]:.0f}%/{medians[1]:.0f}%/{medians[2]:.0f}%), "
-            "since the fixed primer cost becomes negligible relative to total prompt size."
-        )
-    else:
-        footnote = (
-            "as N→∞, percent savings approaches the per-tool median reduction, "
-            "since the fixed primer cost becomes negligible relative to total prompt size."
-        )
-    fig.text(0.5, 0.01, footnote, ha="center", fontsize=8, style="italic")
-
-    fig.suptitle(
-        "CATS break-even (calibrated primer; synthetic N-tool prompts)",
-        fontsize=11,
-        y=0.98,
-    )
-    fig.tight_layout(rect=(0, 0.04, 1, 0.96))
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, dpi=150, bbox_inches="tight")
+    axes[0].set_ylabel("Mean prompt tokens")
+    fig.tight_layout(pad=0.4)
+    _save_paper_figure(fig, out_path.stem, out_path.parent)
 
 
 def _threshold_report(

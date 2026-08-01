@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -22,12 +23,42 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.transforms import Bbox  # noqa: E402
+
+# Journal figure style (two-column A4, 170 mm text width, sans-serif body).
+matplotlib.rcParams.update({
+    "figure.figsize": (6.7, 2.8),   # 170mm text width; keep height tight
+    "font.size": 9,
+    "axes.labelsize": 9,
+    "xtick.labelsize": 8,
+    "ytick.labelsize": 8,
+    "legend.fontsize": 8,
+    "pdf.fonttype": 42,             # embed Type 1/TrueType, never Type 3
+    "savefig.bbox": "tight",
+    "savefig.pad_inches": 0.02,
+})
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_RECORDS = REPO_ROOT / "eval" / "out" / "records.jsonl"
 DEFAULT_OUT_DIR = REPO_ROOT / "eval" / "out"
+FIGURES_DIR = REPO_ROOT / "figures"
 
 TOKENIZERS = ("tiktoken", "qwen", "anthropic")
+# Grayscale-safe: series differ by marker as well as color.
+TOKENIZER_MARKERS = {"tiktoken": "o", "qwen": "s", "anthropic": "^"}
+
+
+def _save_paper_figure(fig, name: str, png_dir: Path) -> None:
+    """Dual-save PDF (paper) + 300 dpi PNG (repo) from the same figure object.
+
+    An explicit full-figure bbox pins the page to exactly 6.7 in wide so the
+    PDF drops into ``\\linewidth`` without scaling.
+    """
+    full_bbox = Bbox([[0.0, 0.0], list(fig.get_size_inches())])
+    for out, kw in ((FIGURES_DIR / f"{name}.pdf", {}), (png_dir / f"{name}.png", {"dpi": 300})):
+        out.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out, bbox_inches=full_bbox, **kw)
+        print(f"Wrote {out}")
 
 TOKENIZER_LABELS = {
     "tiktoken": "tiktoken o200k_base — GPT-5.X",
@@ -157,18 +188,21 @@ def main() -> None:
     axis_lo = max(0, lo - pad)
     axis_hi = hi + pad
 
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(6.7, 2.8))
     for tok, points in series:
         xs = [j for _, j, _ in points]
         ys = [c for _, _, c in points]
         n_wins, n_bad, _ = _summarize(tok, points)
+        # Rasterize only the scatter layer: text/axes stay vector, file stays small.
         ax.scatter(
             xs,
             ys,
-            s=10,
-            alpha=0.22,
+            s=6,
+            alpha=0.25,
             color=TOKENIZER_COLORS[tok],
+            marker=TOKENIZER_MARKERS[tok],
             edgecolors="none",
+            rasterized=True,
             label=f"{tok} ({n_wins}/{len(points)} below y=x)",
         )
 
@@ -176,7 +210,7 @@ def main() -> None:
         [axis_lo, axis_hi],
         [axis_lo, axis_hi],
         color="tab:red",
-        linewidth=1.5,
+        linewidth=1.2,
         linestyle="--",
         label="y = x (no savings)",
         zorder=5,
@@ -184,18 +218,33 @@ def main() -> None:
 
     ax.set_xlim(axis_lo, axis_hi)
     ax.set_ylim(axis_lo, axis_hi)
-    ax.set_aspect("equal", adjustable="box")
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
-    ax.set_title(title, fontsize=10)
     ax.grid(alpha=0.3)
     ax.legend(loc="lower right", fontsize=8)
 
-    fig.tight_layout()
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, dpi=150)
+    fig.tight_layout(pad=0.4)
+    # Inline label on the reference line (above it — all points sit below y=x),
+    # rotated to the on-screen slope of the line.
+    fig.canvas.draw()
+    p1 = ax.transData.transform((axis_lo, axis_lo))
+    p2 = ax.transData.transform((axis_hi, axis_hi))
+    angle = math.degrees(math.atan2(p2[1] - p1[1], p2[0] - p1[0]))
+    mid = axis_lo + 0.45 * (axis_hi - axis_lo)
+    ax.annotate(
+        "y = x (no savings)",
+        (mid, mid),
+        xytext=(0, 5),
+        textcoords="offset points",
+        rotation=angle,
+        rotation_mode="anchor",
+        ha="center",
+        va="bottom",
+        fontsize=8,
+        color="tab:red",
+    )
+    _save_paper_figure(fig, out_path.stem, out_path.parent)
     plt.close(fig)
-    print(f"Wrote {out_path}")
 
 
 if __name__ == "__main__":

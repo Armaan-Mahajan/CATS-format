@@ -19,10 +19,38 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
+from matplotlib.transforms import Bbox  # noqa: E402
+
+# Journal figure style (two-column A4, 170 mm text width, sans-serif body).
+matplotlib.rcParams.update({
+    "figure.figsize": (6.7, 2.8),   # 170mm text width; keep height tight
+    "font.size": 9,
+    "axes.labelsize": 9,
+    "xtick.labelsize": 8,
+    "ytick.labelsize": 8,
+    "legend.fontsize": 8,
+    "pdf.fonttype": 42,             # embed Type 1/TrueType, never Type 3
+    "savefig.bbox": "tight",
+    "savefig.pad_inches": 0.02,
+})
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RAW_DIR = REPO_ROOT / "results" / "part2" / "raw"
 GRAPH_DIR = REPO_ROOT / "results" / "part2" / "graphs"
+FIGURES_DIR = REPO_ROOT / "figures"
+
+
+def _save_paper_figure(fig, name: str) -> None:
+    """Dual-save PDF (paper) + 300 dpi PNG (repo) from the same figure object.
+
+    An explicit full-figure bbox pins the page to exactly 6.7 in wide so the
+    PDF drops into ``\\linewidth`` without scaling.
+    """
+    full_bbox = Bbox([[0.0, 0.0], list(fig.get_size_inches())])
+    for out, kw in ((FIGURES_DIR / f"{name}.pdf", {}), (GRAPH_DIR / f"{name}.png", {"dpi": 300})):
+        out.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out, bbox_inches=full_bbox, **kw)
+        print(f"Wrote {out}")
 
 MODEL_ORDER = ["gpt", "claude", "qwen"]
 MODEL_LABELS = {
@@ -126,40 +154,52 @@ def plot_non_inferiority_forest(paired_rows: list[dict]) -> None:
     ]
     rows.sort(key=lambda r: MODEL_ORDER.index(r["model_short"]))
 
-    fig, ax = plt.subplots(figsize=(8, 3.8))
+    fig, ax = plt.subplots(figsize=(6.7, 2.6))
     y = np.arange(len(rows))
 
+    lows, highs = [], []
     for i, row in enumerate(rows):
         diff = float(row["difference_a_minus_b"]) * 100
         lo = float(row["difference_ci_lower"]) * 100
         hi = float(row["difference_ci_upper"]) * 100
+        lows.append(lo)
+        highs.append(hi)
         verdict = row.get("non_inferiority_verdict") or "inconclusive"
         color = NI_VERDICT_COLORS.get(verdict, "#666666")
-        ax.plot([lo, hi], [i, i], color=color, linewidth=2.5, solid_capstyle="round")
-        ax.scatter([diff], [i], color=color, s=60, zorder=3)
+        ax.plot([lo, hi], [i, i], color=color, linewidth=2, solid_capstyle="round")
+        ax.scatter([diff], [i], color=color, s=30, zorder=3)
         ax.annotate(
             f"{verdict}  ({diff:+.1f} pp)",
             (hi, i),
             xytext=(6, 0),
             textcoords="offset points",
             va="center",
-            fontsize=9,
+            fontsize=8,
             color=color,
         )
 
     ax.axvline(0, color="#888888", linestyle="-", linewidth=1)
-    ax.axvline(-3.0, color="#E45756", linestyle="--", linewidth=1.2, label="−δ = −3 pp")
+    ax.axvline(-3.0, color="#E45756", linestyle="--", linewidth=1.2)
+    ax.annotate(
+        "−δ = −3 pp",
+        (-3.0, 0.96),
+        xycoords=("data", "axes fraction"),
+        xytext=(4, 0),
+        textcoords="offset points",
+        va="top",
+        fontsize=8,
+        color="#E45756",
+    )
+    # Right headroom so verdict labels stay inside the axes.
+    ax.set_xlim(min(lows + [-3.0]) - 0.5, max(highs) + 2.4)
+    ax.set_ylim(-0.6, len(rows) - 0.4)
     ax.set_yticks(y)
     ax.set_yticklabels([MODEL_LABELS[r["model_short"]] for r in rows])
     ax.set_xlabel("CATS − JSON semantic accuracy (percentage points, 95% CI)")
-    ax.set_title("Headline non-inferiority: CATS (a) vs JSON (b), paired by entry")
-    ax.legend(loc="lower right", fontsize=9)
     ax.grid(axis="x", alpha=0.3)
-    fig.tight_layout()
-    out = GRAPH_DIR / "non_inferiority_forest.png"
-    fig.savefig(out, dpi=150, bbox_inches="tight")
+    fig.tight_layout(pad=0.4)
+    _save_paper_figure(fig, "non_inferiority_forest")
     plt.close(fig)
-    print(f"Wrote {out}")
 
 
 def plot_mcnemar_stacked(paired_rows: list[dict]) -> None:
@@ -210,16 +250,17 @@ def plot_mcnemar_stacked(paired_rows: list[dict]) -> None:
 
 
 def plot_prompt_vs_native(paired_rows: list[dict]) -> None:
+    # Grayscale-safe: the two series differ by hatch as well as color.
     series = [
-        ("a_cats_vs_c_native", "CATS − native (a−c)", "#4C78A8"),
-        ("b_json_vs_c_native", "JSON − native (b−c)", "#F58518"),
+        ("a_cats_vs_c_native", "CATS − native (a−c)", "#4C78A8", None),
+        ("b_json_vs_c_native", "JSON − native (b−c)", "#F58518", "///"),
     ]
-    fig, ax = plt.subplots(figsize=(9, 4.5))
+    fig, ax = plt.subplots(figsize=(6.7, 2.8))
     x = np.arange(len(MODEL_ORDER))
     width = 0.32
     offsets = [-width / 2, width / 2]
 
-    for offset, (comparison, label, color) in zip(offsets, series):
+    for offset, (comparison, label, color, hatch) in zip(offsets, series):
         diffs, err_lo, err_hi, ns = [], [], [], []
         for model in MODEL_ORDER:
             row = next(
@@ -243,9 +284,11 @@ def plot_prompt_vs_native(paired_rows: list[dict]) -> None:
             label=label,
             color=color,
             edgecolor="white",
+            hatch=hatch,
+            linewidth=0.6,
             yerr=[err_lo, err_hi],
-            capsize=4,
-            error_kw={"elinewidth": 1.2, "capthick": 1.2},
+            capsize=3,
+            error_kw={"elinewidth": 1.0, "capthick": 1.0},
         )
 
     ax.axhline(0, color="#888888", linewidth=1)
@@ -253,17 +296,14 @@ def plot_prompt_vs_native(paired_rows: list[dict]) -> None:
     ax.set_xticklabels(
         [f"{MODEL_LABELS[m]}\n(n≈{next(r['paired_n'] for r in paired_rows if r['model_short']==m and r['comparison']=='a_cats_vs_c_native')})"
          for m in MODEL_ORDER],
-        fontsize=9,
+        fontsize=8,
     )
-    ax.set_ylabel("Semantic accuracy difference (pp, 95% CI)")
-    ax.set_title("Prompt conditions vs native baseline (paired, both syntactically valid)")
-    ax.legend(loc="best", fontsize=9)
+    ax.set_ylabel("Semantic accuracy difference\n(pp, 95% CI)")
+    ax.legend(loc="best", fontsize=8)
     ax.grid(axis="y", alpha=0.3)
-    fig.tight_layout()
-    out = GRAPH_DIR / "prompt_vs_native_paired.png"
-    fig.savefig(out, dpi=150, bbox_inches="tight")
+    fig.tight_layout(pad=0.4)
+    _save_paper_figure(fig, "prompt_vs_native_paired")
     plt.close(fig)
-    print(f"Wrote {out}")
 
 
 def main() -> None:
