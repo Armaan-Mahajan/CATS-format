@@ -3,7 +3,8 @@
 
 Each point is one unique converted tool: x = compact normalized JSON token count,
 y = CATS token count. Points below y = x are token wins; vertical gap to the line is
-absolute savings. By default all three tokenizers are overlaid (distinct colors).
+absolute savings. By default all three tokenizers are shown as square side-by-side
+panels (equal aspect, shared limits) so y = x renders at a true 45 degrees.
 
 Run::
 
@@ -15,7 +16,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import sys
 from pathlib import Path
 
@@ -64,6 +64,13 @@ TOKENIZER_LABELS = {
     "tiktoken": "tiktoken o200k_base — GPT-5.X",
     "qwen": "qwen — Qwen3.5-35B-A3B",
     "anthropic": "anthropic — Claude Sonnet 4.6 / Opus 4.6",
+}
+
+# Short per-panel headings (subplot labels, not a figure-level title).
+PANEL_TITLES = {
+    "tiktoken": "tiktoken (o200k_base)",
+    "qwen": "Qwen3.5-35B-A3B",
+    "anthropic": "Anthropic",
 }
 
 TOKENIZER_COLORS = {
@@ -158,29 +165,18 @@ def main() -> None:
         raise SystemExit(1)
 
     print(f"records: {records_path}\n")
-    title_parts: list[str] = []
     all_xs: list[int] = []
     all_ys: list[int] = []
 
     for tok, points in series:
         _print_summary(records_path, tok, points)
-        n_wins, _, _ = _summarize(tok, points)
-        title_parts.append(f"{tok} {n_wins}/{len(points)}")
         all_xs.extend(j for _, j, _ in points)
         all_ys.extend(c for _, _, c in points)
 
     if tok_arg == "all":
         out_path = args.output or (DEFAULT_OUT_DIR / "json_vs_cats.png")
-        xlabel = "JSON tokens (compact normalized tool schema)"
-        ylabel = "CATS tokens"
-        title = "JSON vs CATS per tool — " + " · ".join(title_parts)
     else:
         out_path = args.output or (DEFAULT_OUT_DIR / f"json_vs_cats_{tok_arg}.png")
-        xlabel = f"JSON tokens ({tok_arg}, compact normalized tool schema)"
-        ylabel = f"CATS tokens ({tok_arg})"
-        tok, points = series[0]
-        n_wins, _, _ = _summarize(tok, points)
-        title = f"{TOKENIZER_LABELS[tok]}: {n_wins}/{len(points)} tools below y=x"
 
     lo = min(min(all_xs), min(all_ys))
     hi = max(max(all_xs), max(all_ys))
@@ -188,11 +184,15 @@ def main() -> None:
     axis_lo = max(0, lo - pad)
     axis_hi = hi + pad
 
-    fig, ax = plt.subplots(figsize=(6.7, 2.8))
-    for tok, points in series:
+    # One square panel per tokenizer. Identical shared limits plus equal aspect
+    # (both axes are token counts) render y = x at a true 45 degrees.
+    fig, axes = plt.subplots(
+        1, len(series), figsize=(6.7, 2.8), sharex=True, sharey=True, squeeze=False,
+    )
+    panels = axes[0]
+    for ax, (tok, points) in zip(panels, series):
         xs = [j for _, j, _ in points]
         ys = [c for _, _, c in points]
-        n_wins, n_bad, _ = _summarize(tok, points)
         # Rasterize only the scatter layer: text/axes stay vector, file stays small.
         ax.scatter(
             xs,
@@ -203,46 +203,42 @@ def main() -> None:
             marker=TOKENIZER_MARKERS[tok],
             edgecolors="none",
             rasterized=True,
-            label=f"{tok} ({n_wins}/{len(points)} below y=x)",
         )
+        ax.plot(
+            [axis_lo, axis_hi],
+            [axis_lo, axis_hi],
+            color="tab:red",
+            linewidth=1.2,
+            linestyle="--",
+            zorder=5,
+        )
+        ax.set_xlim(axis_lo, axis_hi)
+        ax.set_ylim(axis_lo, axis_hi)
+        ax.set_aspect("equal")
+        ax.set_title(PANEL_TITLES.get(tok, tok), fontsize=9)
+        ax.grid(alpha=0.3)
 
-    ax.plot(
-        [axis_lo, axis_hi],
-        [axis_lo, axis_hi],
-        color="tab:red",
-        linewidth=1.2,
-        linestyle="--",
-        label="y = x (no savings)",
-        zorder=5,
-    )
+    # Axis labels once: y on the leftmost panel, x on the middle one.
+    panels[0].set_ylabel("CATS tokens")
+    panels[len(panels) // 2].set_xlabel("JSON Schema tokens")
 
-    ax.set_xlim(axis_lo, axis_hi)
-    ax.set_ylim(axis_lo, axis_hi)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-    ax.grid(alpha=0.3)
-    ax.legend(loc="lower right", fontsize=8)
-
-    fig.tight_layout(pad=0.4)
-    # Inline label on the reference line (above it — all points sit below y=x),
-    # rotated to the on-screen slope of the line.
-    fig.canvas.draw()
-    p1 = ax.transData.transform((axis_lo, axis_lo))
-    p2 = ax.transData.transform((axis_hi, axis_hi))
-    angle = math.degrees(math.atan2(p2[1] - p1[1], p2[0] - p1[0]))
-    mid = axis_lo + 0.45 * (axis_hi - axis_lo)
-    ax.annotate(
+    # Inline reference-line label in the leftmost panel only (points all sit
+    # below y = x, so above the line is clear); equal aspect makes 45° exact.
+    mid = axis_lo + 0.5 * (axis_hi - axis_lo)
+    panels[0].annotate(
         "y = x (no savings)",
         (mid, mid),
-        xytext=(0, 5),
+        xytext=(0, 3),
         textcoords="offset points",
-        rotation=angle,
+        rotation=45,
         rotation_mode="anchor",
         ha="center",
         va="bottom",
         fontsize=8,
         color="tab:red",
     )
+
+    fig.tight_layout(pad=0.4)
     _save_paper_figure(fig, out_path.stem, out_path.parent)
     plt.close(fig)
 
