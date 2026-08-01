@@ -1,6 +1,6 @@
 [project]
 name = "cats-converter"
-version = "0.1.0"
+version = "1.0.0"
 description = "Reference converter between JSON Schema tool definitions and CATS (Compact Agent Tool Schema)."
 readme = "README.md"
 license = {text = "MIT"}

@@ -6,6 +6,8 @@ This repository contains the format specification, a reference converter (JSON S
 
 ## Summary of findings
 
+![Per-tool token reduction by tokenizer](results/part1/graphs/reduction_boxplot.png)
+
 - **Token cost.** Across a public benchmark of real tool definitions (the Berkeley Function Calling Leaderboard, BFCL), CATS reduces per-tool input tokens by a median of roughly 30%, and this holds across the OpenAI, Qwen, and Anthropic tokenizers. Savings shrink as a tool grows larger, and there is a break-even point (around 6 tools in a prompt) below which the one-time format primer is not yet paid off.
 - **Accuracy.** Measured against JSON Schema placed in the prompt, CATS carries a small accuracy cost that varies by model. On GPT-5.4 it is conclusively non-inferior at the pre-specified 3-percentage-point margin (−0.7 pp, p = 0.45). On Claude Sonnet 4.6 (−1.9 pp, p = 0.045) and Qwen3.5-35B-A3B (−2.6 pp, p = 0.005) non-inferiority is **inconclusive**: both show a statistically measurable gap whose confidence interval extends past the margin, so non-inferiority is neither confirmed nor ruled out.
 
