@@ -12,8 +12,8 @@ type: software
 authors:
   - family-names: Mahajan
     given-names: Armaan
-version: 1.0.0
-date-released: "2026-07-25"
+version: 1.0.1
+date-released: "2026-11-01"
 license: MIT
 repository-code: "https://github.com/Armaan-Mahajan/CATS-format"
 url: "https://github.com/Armaan-Mahajan/CATS-format"

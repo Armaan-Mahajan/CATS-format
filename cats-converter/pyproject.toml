@@ -1,7 +1,8 @@
 [project]
 name = "cats-converter"
-version = "1.0.0"
+version = "1.0.1"
 description = "Reference converter between JSON Schema tool definitions and CATS (Compact Agent Tool Schema)."
+authors = [{ name = "Armaan Mahajan" }]
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11,<3.14"
