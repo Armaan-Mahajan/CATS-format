@@ -1,5 +1,7 @@
 # CATS — Compact Agent Tool Schema
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23854518.svg)](https://doi.org/10.5281/zenodo.23854518)
+
 CATS is a compact notation for the tool (function) definitions sent to large language models in tool-calling APIs. JSON Schema, the usual format, was designed to be parsed by machines; CATS is designed to be read by a language model. Encoding the same tool definition in CATS rather than JSON Schema reduces the number of input tokens the model must process, with a small and model-dependent effect on tool-calling accuracy.
 
 This repository contains the format specification, a reference converter (JSON Schema ↔ CATS), and the full evaluation behind a forthcoming paper.
@@ -96,6 +98,7 @@ The paper describing CATS is in preparation. Until it is available, please cite 
   author       = {Mahajan, Armaan},
   title        = {{CATS}: {Compact Agent Tool Schema}},
   year         = {2026},
+  doi          = {10.5281/zenodo.23854518},
   howpublished = {\url{https://github.com/Armaan-Mahajan/CATS-format}},
   note         = {Specification available as \texttt{spec.md}; usage protocol available as \texttt{protocol.md}}
 }
