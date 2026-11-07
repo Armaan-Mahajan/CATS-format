@@ -91,7 +91,21 @@ MIT — see [LICENSE](LICENSE). © 2026 Armaan Mahajan.
 
 ## Citation
 
-The paper describing CATS is in preparation. Until it is available, please cite this repository:
+If you use CATS, please cite the preprint:
+
+```bibtex
+@misc{mahajan2026cats,
+  author    = {Mahajan, Armaan},
+  title     = {{CATS}: A Model-First Notation for Compact {LLM} Tool Definitions},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.24030172},
+  url       = {https://doi.org/10.5281/zenodo.24030172},
+  note      = {Preprint}
+}
+```
+
+To cite the software itself (specification, reference converter, and evaluation code):
 
 ```bibtex
 @misc{cats2026,
