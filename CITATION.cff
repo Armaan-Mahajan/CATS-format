@@ -12,6 +12,7 @@ type: software
 authors:
   - family-names: Mahajan
     given-names: Armaan
+    orcid: "https://orcid.org/0009-0009-0247-7260"
 version: 1.0.1
 date-released: "2026-11-01"
 doi: 10.5281/zenodo.23854518
